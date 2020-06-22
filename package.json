@@ -1,0 +1,29 @@
+{
+  "name": "pubg.io",
+  "version": "1.0.0",
+  "description": "Making a web game similar to surviv.io",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"not implemented\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TakLee96/pubg.io.git"
+  },
+  "keywords": [
+    "node.js",
+    "socket.io",
+    "web",
+    "game"
+  ],
+  "author": "TakLee96",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TakLee96/pubg.io/issues"
+  },
+  "homepage": "https://github.com/TakLee96/pubg.io#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
