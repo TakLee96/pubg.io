@@ -1,0 +1,16 @@
+#loginForm {
+  display: table;
+  border: 1px solid black;
+  margin: 5px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+#loginForm div {
+  padding: 5px;
+}
+
+#playground {
+  border: 1px solid black;
+  margin: 5px;
+}

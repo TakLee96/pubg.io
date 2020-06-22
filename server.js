@@ -40,7 +40,7 @@ socket.on('connection', (client) => {
   client.on('t24b.addPlayer', (player) => {
     log(client, `t24b.addPlayer ${JSON.stringify(player)}`);
     t24b.addPlayer(client, player);
-    client.emit('t24b.addPlayer.response', { map: t24b.map, time: new Date() });
+    client.emit('t24b.addPlayer.response', { id: client.conn.id, map: t24b.map, time: new Date() });
   });
   client.on('t24b.action', (action) => {
     log(client, `t24b.action ${JSON.stringify(action)}`);
