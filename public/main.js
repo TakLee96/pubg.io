@@ -2,6 +2,78 @@
  * @author TakLee96 / jiahang_li@outlook.com
  **/
 
+// socket.io message handling
+const socket = io();
+
+socket.on('connect', function () {
+  console.log('remote connected');
+  socket.on('disconnect', function () {
+    console.log('remote disconnected');
+  });
+  
+  socket.on('t24b.addPlayer.response', ({ error, id, map, time }) => {
+    if (error) return console.error(error);
+    console.log('t24b.addPlayer.response', id, map, time);
+    state.id = id;
+    state.map = map;
+    state.time = time;
+    render();
+  });
+  
+  socket.on('t24b.action.response', ({ error, map, time }) => {
+    if (error) return console.error(error);
+    
+    if (time > state.time) {
+      console.log('t24b.action.response', map, time);
+      state.map = map;
+      state.time = time;
+      render();
+    } else {
+      console.error('stale t24b.action.response', map, time);
+    }
+  })
+});
+
+// login handling
+document.getElementById('goButton').addEventListener('click', function login(evt) {
+  evt.preventDefault();
+  const form = document.getElementById('loginForm');
+  const username = form.username.value;
+  const color = form.color.value;
+  
+  if (username === '') {
+    return alert('Pick a cooler username!');
+  }
+  
+  if (color === '#000000') {
+    return alert("Don't just pick default black for color!");
+  }
+  
+  socket.emit('t24b.addPlayer', { username, color })
+});
+
+// control state handling and rendering
+const keys = { w: false, s: false, a: false, d: false };
+document.addEventListener('keydown', function (evt) {
+  switch (evt.keyCode) {
+    case 87: keys['w'] = true; break;
+    case 83: keys['s'] = true; break;
+    case 65: keys['a'] = true; break;
+    case 68: keys['d'] = true; break;
+    default: break;
+  }
+});
+
+document.addEventListener('keyup', function (evt) {
+  switch (evt.keyCode) {
+    case 87: keys['w'] = false; break;
+    case 83: keys['s'] = false; break;
+    case 65: keys['a'] = false; break;
+    case 68: keys['d'] = false; break;
+    default: break;
+  }
+});
+
 // game state handling and rendering
 const state = {
   id: null,
@@ -14,6 +86,7 @@ const pgContext = playground.getContext('2d');
 
 function render() {
   if (!state.map) return;
+  pgContext.clearRect(0, 0, playground.width, playground.height);
   
   let myself = state.map.players[state.id];
   let top = Math.max(myself.y - playground.height / 2, 0);
@@ -67,53 +140,16 @@ function render() {
   }
 }
 
-// socket.io message handling
-const socket = io();
-
-socket.on('connect', function () {
-  console.log('remote connected');
-  socket.on('disconnect', function () {
-    console.log('remote disconnected');
-  });
-  
-  socket.on('t24b.addPlayer.response', ({ error, id, map, time }) => {
-    if (error) return console.error(error);
-    console.log('t24b.addPlayer.response', id, map, time);
-    state.id = id;
-    state.map = map;
-    state.time = time;
-    render();
-  });
-  
-  socket.on('t24b.action.response', ({ error, map, time }) => {
-    if (error) return console.error(error);
-    
-    if (time > state.time) {
-      console.log('t24b.action.response', map, time);
-      state.map = map;
-      state.time = time;
-      render();
-    } else {
-      console.error('stale t24b.action.response', map, time);
-    }
-  })
-});
-
-function login() {
-  const form = document.getElementById('loginForm');
-  const username = form.username.value;
-  const color = form.color.value;
-  
-  if (username === '') {
-    alert('Pick a cooler username!');
-    return false;
+// main loop
+function main() {
+  let x = 0, y = 0;
+  if (keys['w']) y = y - 1;
+  if (keys['s']) y = y + 1;
+  if (keys['a']) x = x - 1;
+  if (keys['d']) x = x + 1;
+  if (state.id && (x !== 0 || y !== 0)) {
+    socket.emit('t24b.action', { type: 'MOVE', direction: { x, y } });
   }
-  
-  if (color === '#000000') {
-    alert("Don't just pick default black for color!");
-    return false;
-  }
-  
-  socket.emit('t24b.addPlayer', { username, color })
-  return false;
 }
+
+setInterval(main, 100);
