@@ -5,8 +5,16 @@
     <title>PUBG.IO</title>
   </head>
   <body>
-    <h1>HELLO PUBG.IO</h1>
+    <h1>WELCOME TO PUBG.IO</h1>
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username"/>
+      <label for="color">Color</label>
+      <input type="color" name="color" id="color">
+      <button onclick="return login()">GO!</button>
+    </form>
     <script type="text/javascript" src="/socket.io.dev.js"></script>
+    <script type="text/javascript" src="/state.js"></script>
     <script type="text/javascript" src="/main.js"></script>
   </body>
 </html>
