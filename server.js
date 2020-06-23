@@ -14,7 +14,7 @@ const socket = io(server);
 
 // helper functions
 function log(client, msg) {
-  console.log(`[${new Date().toISOString()}] ${[client.conn.id]} ${msg}`);
+  console.log(`[${new Date().toISOString()}] ${[client.id]} ${msg}`);
 }
 
 // static routes
@@ -40,12 +40,16 @@ socket.on('connection', (client) => {
   client.on('t24b.addPlayer', (player) => {
     log(client, `t24b.addPlayer ${JSON.stringify(player)}`);
     t24b.addPlayer(client, player);
-    client.emit('t24b.addPlayer.response', { id: client.conn.id, map: t24b.map, time: new Date() });
+    client.emit('t24b.addPlayer.response', { id: client.id, map: t24b.map, time: new Date() });
   });
   client.on('t24b.action', (action) => {
     log(client, `t24b.action ${JSON.stringify(action)}`);
     t24b.action(client, action);
-    client.emit('t24b.action.response', { map: t24b.map, time: new Date() });
+    let updatedState = { map: t24b.map, time: new Date() };
+    client.emit('t24b.action.response', updatedState);
+    for (let neighbor of t24b.neighbors(client)) {
+      client.broadcast.to(neighbor).emit('t24b.action.response', updatedState);
+    }
   });
 });
 

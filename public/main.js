@@ -2,6 +2,8 @@
  * @author TakLee96 / jiahang_li@outlook.com
  **/
 
+/* global window, document, io, DISPLAY_WIDTH, DISPLAY_HEIGHT */
+
 // socket.io message handling
 const socket = io();
 
@@ -82,6 +84,8 @@ const state = {
 };
 
 const playground = document.getElementById('playground');
+playground.width  = DISPLAY_WIDTH;
+playground.height = DISPLAY_HEIGHT;
 const pgContext = playground.getContext('2d');
 
 function clip(val, min, max) {
