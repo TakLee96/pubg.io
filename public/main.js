@@ -55,6 +55,28 @@ document.getElementById('goButton').addEventListener('click', function login(evt
 });
 
 // control state handling and rendering
+const playground = document.getElementById('playground');
+playground.width  = DISPLAY_WIDTH;
+playground.height = DISPLAY_HEIGHT;
+const pgContext = playground.getContext('2d');
+
+const mouse = { x: 0, y: 0, down: false };
+function updateMouseLocation(evt) {
+  let rect = playground.getBoundingClientRect();
+  mouse.x = evt.clientX - rect.left;
+  mouse.y = evt.clientY - rect.top;
+}
+
+playground.addEventListener("mousemove", updateMouseLocation);
+playground.addEventListener("mousedown", function (evt) {
+  updateMouseLocation(evt);
+  mouse.down = true;
+});
+playground.addEventListener("mouseup", function (evt) {
+  updateMouseLocation(evt);
+  mouse.down = false;
+});
+
 const keys = { w: false, s: false, a: false, d: false };
 document.addEventListener('keydown', function (evt) {
   switch (evt.keyCode) {
@@ -83,28 +105,37 @@ const state = {
   time: null,
 };
 
-const playground = document.getElementById('playground');
-playground.width  = DISPLAY_WIDTH;
-playground.height = DISPLAY_HEIGHT;
-const pgContext = playground.getContext('2d');
-
 function clip(val, min, max) {
   return Math.min(Math.max(val, min), max);
+}
+
+function getCameraPosition() {
+  let myself = state.map.players[state.id];
+  let cameraX = clip(myself.x, playground.width  / 2, state.map.size.width  - playground.width  / 2);
+  let cameraY = clip(myself.y, playground.height / 2, state.map.size.height - playground.height / 2);
+  
+  return {
+    top    : cameraY - playground.height / 2,
+    left   : cameraX - playground.width  / 2,
+    bottom : cameraY + playground.height / 2,
+    right  : cameraX + playground.width  / 2,
+  };
+}
+
+function computeMouseDirection() {
+  let myself = state.map.players[state.id];
+  let { top, left } = getCameraPosition();
+  return {
+    x: mouse.x - (myself.x - left),
+    y: mouse.y - (myself.y - top),
+  };
 }
 
 function render() {
   if (!state.map) return;
   pgContext.clearRect(0, 0, playground.width, playground.height);
   
-  let myself = state.map.players[state.id];
-  let cameraX = clip(myself.x, playground.width  / 2, state.map.size.width  - playground.width  / 2);
-  let cameraY = clip(myself.y, playground.height / 2, state.map.size.height - playground.height / 2);
-  
-  
-  let top    = cameraY - playground.height / 2;
-  let left   = cameraX - playground.width  / 2;
-  let bottom = cameraY + playground.height / 2;
-  let right  = cameraX + playground.width  / 2;
+  let { top, left, bottom, right } = getCameraPosition();
   
   function inRange(x, y) {
     return (
@@ -168,8 +199,16 @@ function main() {
   if (keys['s']) y = y + 1;
   if (keys['a']) x = x - 1;
   if (keys['d']) x = x + 1;
-  if (state.id && (x !== 0 || y !== 0)) {
-    socket.emit('t24b.action', { type: 'MOVE', direction: { x, y } });
+  if (state.id) {
+    if (x !== 0 || y !== 0) {
+      socket.emit('t24b.action', { type: 'MOVE', direction: { x, y } });
+    }
+    if (mouse.down) {
+      socket.emit('t24b.action', {
+        type: 'SHOOT',
+        direction: computeMouseDirection(),
+      });
+    }
   }
 }
 

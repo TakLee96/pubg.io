@@ -10,3 +10,4 @@ Making a web game similar to surviv.io
 * Implement log-off and stale session mechanism
 * Implement session, game termination, score accumulation and map abstraction
 * Implement collision detection
+* Maintain same hitboxes but upgrade materials to images
