@@ -84,15 +84,23 @@ const state = {
 const playground = document.getElementById('playground');
 const pgContext = playground.getContext('2d');
 
+function clip(val, min, max) {
+  return Math.min(Math.max(val, min), max);
+}
+
 function render() {
   if (!state.map) return;
   pgContext.clearRect(0, 0, playground.width, playground.height);
   
   let myself = state.map.players[state.id];
-  let top = Math.max(myself.y - playground.height / 2, 0);
-  let left = Math.max(myself.x - playground.width / 2, 0);
-  let bottom = Math.min(myself.y + playground.height / 2, state.map.size.height)
-  let right = Math.min(myself.x + playground.width / 2, state.map.size.width)
+  let cameraX = clip(myself.x, playground.width  / 2, state.map.size.width  - playground.width  / 2);
+  let cameraY = clip(myself.y, playground.height / 2, state.map.size.height - playground.height / 2);
+  
+  
+  let top    = cameraY - playground.height / 2;
+  let left   = cameraX - playground.width  / 2;
+  let bottom = cameraY + playground.height / 2;
+  let right  = cameraX + playground.width  / 2;
   
   function inRange(x, y) {
     return (
@@ -152,4 +160,4 @@ function main() {
   }
 }
 
-setInterval(main, 100);
+setInterval(main, 50);
