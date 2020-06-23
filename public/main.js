@@ -131,6 +131,15 @@ function render() {
       default:
         console.error(`unknown geometry shape ${mapObject.geometry.shape}`);
     }
+    
+    if (mapObject.geometry.username) {
+      pgContext.font = '12px monospace';
+      pgContext.fillText(mapObject.geometry.username, x - 20, y - 40);
+    }
+    if (mapObject.geometry.hp) {
+      pgContext.fillStyle = 'red';
+      pgContext.fillRect(x - 20, y - 32.5, mapObject.geometry.hp * 0.4, 10);
+    }
   }
   
   for (let player of Object.values(state.map.players)) {
