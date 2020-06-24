@@ -49,13 +49,16 @@ socket.on('connection', (client) => {
   
   client.on('t24b.action', (action) => {
     if (t24b.players[client.id]) {
-      let success = t24b.action(client, action);
-      if (success) {
-        log(client, `t24b.action ${JSON.stringify(action)}`);
+      let affectedNeighbors = t24b.action(client, action);
+      if (affectedNeighbors.length > 0) {
+        log(client, `t24b.action ${JSON.stringify(action)} ${affectedNeighbors}`);
         let updatedState = { map: t24b.map, time: new Date() };
-        client.emit('t24b.action.response', updatedState);
-        for (let neighbor of t24b.getActionNeighbors(client, action)) {
-          client.broadcast.to(neighbor).emit('t24b.action.response', updatedState);
+        for (let neighbor of affectedNeighbors) {
+          let target = client;
+          if (neighbor != client.id) {
+            target = client.broadcast.to(neighbor);
+          }
+          target.emit('t24b.action.response', updatedState);
         }
       } else {
         log(client, `FAILED t24b.action ${JSON.stringify(action)}`);

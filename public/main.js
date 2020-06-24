@@ -2,7 +2,7 @@
  * @author TakLee96 / jiahang_li@outlook.com
  **/
 
-/* global window, document, io, DISPLAY_WIDTH, DISPLAY_HEIGHT */
+/* global window, document, io, clip, DISPLAY_WIDTH, DISPLAY_HEIGHT */
 
 // socket.io message handling
 const socket = io();
@@ -113,10 +113,6 @@ const state = {
   time: null,
   error: null,
 };
-
-function clip(val, min, max) {
-  return Math.min(Math.max(val, min), max);
-}
 
 function getCameraPosition() {
   let myself = state.map.players[state.id];
