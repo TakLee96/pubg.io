@@ -34,21 +34,35 @@ socket.on('connection', (client) => {
   
   client.on('disconnect', () => {
     log(client, `${conn.remoteAddress} disconnected`);
-    t24b.removePlayer(client);
+    if (t24b.players[client.id]) {
+      t24b.removePlayer(client);
+    }
   });
   
   client.on('t24b.addPlayer', (player) => {
     log(client, `t24b.addPlayer ${JSON.stringify(player)}`);
     t24b.addPlayer(client, player);
-    client.emit('t24b.addPlayer.response', { id: client.id, map: t24b.map, time: new Date() });
+    let updatedState = { id: client.id, map: t24b.map, time: new Date() };
+    client.emit('t24b.addPlayer.response', updatedState);
+    client.broadcast.emit('t24b.action.response', updatedState);
   });
+  
   client.on('t24b.action', (action) => {
-    log(client, `t24b.action ${JSON.stringify(action)}`);
-    t24b.action(client, action);
-    let updatedState = { map: t24b.map, time: new Date() };
-    client.emit('t24b.action.response', updatedState);
-    for (let neighbor of t24b.neighbors(client)) {
-      client.broadcast.to(neighbor).emit('t24b.action.response', updatedState);
+    if (t24b.players[client.id]) {
+      let success = t24b.action(client, action);
+      if (success) {
+        log(client, `t24b.action ${JSON.stringify(action)}`);
+        let updatedState = { map: t24b.map, time: new Date() };
+        client.emit('t24b.action.response', updatedState);
+        for (let neighbor of t24b.getActionNeighbors(client, action)) {
+          client.broadcast.to(neighbor).emit('t24b.action.response', updatedState);
+        }
+      } else {
+        log(client, `FAILED t24b.action ${JSON.stringify(action)}`);
+      }
+    } else {
+      log(client, `STALE t24b.action ${JSON.stringify(action)}`);
+      client.emit('relogin', { error: 'Server restarted; please relogin!' });
     }
   });
 });

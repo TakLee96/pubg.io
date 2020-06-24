@@ -33,7 +33,15 @@ socket.on('connect', function () {
     } else {
       console.error('stale t24b.action.response', map, time);
     }
-  })
+  });
+  
+  socket.on('relogin', ({ error }) => {
+    state.id = null;
+    state.map = null;
+    state.time = null;
+    state.error = error;
+    render();
+  });
 });
 
 // login handling
@@ -103,6 +111,7 @@ const state = {
   id: null,
   map: null,
   time: null,
+  error: null,
 };
 
 function clip(val, min, max) {
@@ -132,8 +141,14 @@ function computeMouseDirection() {
 }
 
 function render() {
-  if (!state.map) return;
   pgContext.clearRect(0, 0, playground.width, playground.height);
+  
+  if (!state.map) {
+    pgContext.fillStyle = 'black';
+    pgContext.font = '20px monospace';
+    pgContext.fillText(state.error || 'Please login first!', 5, 20);
+    return;
+  }
   
   let { top, left, bottom, right } = getCameraPosition();
   
@@ -212,4 +227,5 @@ function main() {
   }
 }
 
-setInterval(main, 50);
+render();
+setInterval(main, FRAME_INTERVAL);
