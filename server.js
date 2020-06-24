@@ -42,17 +42,17 @@ socket.on('connection', (client) => {
   client.on('t24b.addPlayer', (player) => {
     log(client, `t24b.addPlayer ${JSON.stringify(player)}`);
     t24b.addPlayer(client, player);
-    let updatedState = { id: client.id, map: t24b.map, time: new Date() };
+    let updatedState = { id: client.id, map: t24b.map, time: Date.now() };
     client.emit('t24b.addPlayer.response', updatedState);
     client.broadcast.emit('t24b.action.response', updatedState);
   });
   
   client.on('t24b.action', (action) => {
     if (t24b.players[client.id]) {
-      let affectedNeighbors = t24b.action(client, action);
+      let { affectedNeighbors, shots } = t24b.action(client, action);
       if (affectedNeighbors.length > 0) {
         log(client, `t24b.action ${JSON.stringify(action)} ${affectedNeighbors}`);
-        let updatedState = { map: t24b.map, time: new Date() };
+        let updatedState = { map: t24b.map, shots, time: Date.now() };
         for (let neighbor of affectedNeighbors) {
           let target = client;
           if (neighbor != client.id) {

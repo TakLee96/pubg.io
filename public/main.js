@@ -2,7 +2,7 @@
  * @author TakLee96 / jiahang_li@outlook.com
  **/
 
-/* global window, document, io, clip, DISPLAY_WIDTH, DISPLAY_HEIGHT */
+/* global window, document, io, clip, FRAME_INTERVAL, DISPLAY_WIDTH, DISPLAY_HEIGHT */
 
 // socket.io message handling
 const socket = io();
@@ -22,13 +22,18 @@ socket.on('connect', function () {
     render();
   });
   
-  socket.on('t24b.action.response', ({ error, map, time }) => {
+  socket.on('t24b.action.response', ({ error, map, time, shots }) => {
     if (error) return console.error(error);
+    if (!state.id) return;
     
     if (time > state.time) {
-      console.log('t24b.action.response', map, time);
+      console.log('t24b.action.response', map, time, shots);
       state.map = map;
       state.time = time;
+      state.shots = state.shots.concat(
+        shots.map((s) => ({ ...s, time: Date.now() }))
+      );
+      pruneRecentShots();
       render();
     } else {
       console.error('stale t24b.action.response', map, time);
@@ -40,6 +45,7 @@ socket.on('connect', function () {
     state.map = null;
     state.time = null;
     state.error = error;
+    state.shots = [];
     render();
   });
 });
@@ -112,6 +118,7 @@ const state = {
   map: null,
   time: null,
   error: null,
+  shots: [],
 };
 
 function getCameraPosition() {
@@ -201,6 +208,22 @@ function render() {
       render2d(structure);
     }
   }
+  for (let shot of state.shots) {
+    pgContext.beginPath();
+    pgContext.fillStyle = 'black';
+    pgContext.moveTo(shot.from.x - left, shot.from.y - top);
+    pgContext.lineTo(shot.to.x - left, shot.to.y - top);
+    pgContext.stroke(); 
+  }
+}
+
+function pruneRecentShots() {
+  let now = Date.now();
+  let pruned = state.shots.filter((s) => (now < s.time + FRAME_INTERVAL))
+  let flag = (state.shots.length !== pruned.length);
+  state.shots = pruned;
+  
+  return flag;
 }
 
 // main loop
@@ -219,6 +242,9 @@ function main() {
         type: 'SHOOT',
         direction: computeMouseDirection(),
       });
+    }
+    if (pruneRecentShots()) {
+      render();
     }
   }
 }
