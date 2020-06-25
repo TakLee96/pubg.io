@@ -26,6 +26,7 @@ app.get('/restart/:pass', (req, res) => {
   if (req.params.pass === 'mysecretpassword123') {
     t24b = new state();
     socket.sockets.emit('relogin', {error: 'Hit GO! again for new match'});
+    res.json({ success: true });
   }
 });
 

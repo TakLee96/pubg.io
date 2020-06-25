@@ -3,7 +3,6 @@ Making a web game similar to surviv.io
 
 ## TODO
 * Implement session, game termination, score accumulation and map abstraction
-* Implement different types of guns and power-ups
 * Implement damage alerts
 * Implement audio effects
 * Implement collision detection

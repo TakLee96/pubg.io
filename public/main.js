@@ -164,7 +164,7 @@ function render() {
   let players = Object.values(state.map.players);
   let survivors = players.filter((p) => p.geometry.hp > 0);
   if (players.length > 1 && survivors.length <= 1) {
-    messageElem.textContent = `GAME OVER! Winner: ${survivors[0].geometry.username || 'draw'}`;
+    messageElem.textContent = `WINNER WINNER CHICKEN DINNER: ${survivors[0].geometry.username || 'draw'}`;
   }
   
   playerListElem.innerHTML = '';
