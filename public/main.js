@@ -157,12 +157,13 @@ function render() {
   
   let player = state.map.players[state.id].geometry;
   if (player.hp > 0) {
-    messageElem.textContent = `Use WSAD to move around and mouse to shoot. Your Health: ${player.hp}`;
+    messageElem.textContent = `Use WSAD to move around and mouse to shoot. You have a ${player.weapon.name}. Your Health: ${player.hp}`;
   } else {
     messageElem.textContent = `You are dead!`;
   }
-  let survivors = Object.values(state.map.players).filter((p) => p.geometry.hp > 0);
-  if (survivors.length <= 1) {
+  let players = Object.values(state.map.players);
+  let survivors = players.filter((p) => p.geometry.hp > 0);
+  if (players.length > 1 && survivors.length <= 1) {
     messageElem.textContent = `GAME OVER! Winner: ${survivors[0].geometry.username || 'draw'}`;
   }
   
@@ -220,19 +221,22 @@ function render() {
     }
   }
   
-  for (let player of Object.values(state.map.players)) {
-    if (inRange(player.x, player.y)) {
-      render2d(player);
-    }    
-  }
-  for (let pickable of state.map.pickable) {
-    // TODO: implement
-  }
   for (let structure of state.map.structures) {
     if (inRange(structure.x, structure.y)) {
       render2d(structure);
     }
   }
+  for (let pickable of state.map.pickable) {
+    if (inRange(pickable.x, pickable.y)) {
+      render2d(pickable);
+    }
+  }
+  for (let player of Object.values(state.map.players)) {
+    if (inRange(player.x, player.y)) {
+      render2d(player);
+    }    
+  }
+
   for (let shot of state.shots) {
     pgContext.beginPath();
     pgContext.fillStyle = 'black';
