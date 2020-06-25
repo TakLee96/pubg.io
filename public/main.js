@@ -143,6 +143,8 @@ function computeMouseDirection() {
   };
 }
 
+const messageElem = document.getElementById('message');
+const playerListElem = document.getElementById('playerUList');
 function render() {
   pgContext.clearRect(0, 0, playground.width, playground.height);
   
@@ -151,6 +153,24 @@ function render() {
     pgContext.font = '20px monospace';
     pgContext.fillText(state.error || 'Please login first!', 5, 20);
     return;
+  }
+  
+  let player = state.map.players[state.id].geometry;
+  if (player.hp > 0) {
+    messageElem.textContent = `Use WSAD to move around and mouse to shoot. Your Health: ${player.hp}`;
+  } else {
+    messageElem.textContent = `You are dead!`;
+  }
+  let survivors = Object.values(state.map.players).filter((p) => p.geometry.hp > 0);
+  if (survivors.length <= 1) {
+    messageElem.textContent = `GAME OVER! Winner: ${survivors[0].geometry.username || 'draw'}`;
+  }
+  
+  playerListElem.innerHTML = '';
+  for (let other of Object.values(state.map.players)) {
+    let liElem = document.createElement('li');
+    liElem.textContent = `${other.geometry.username} ${other.geometry.hp > 0 ? 'alive' : 'dead'}`;
+    playerListElem.appendChild(liElem);
   }
   
   let { top, left, bottom, right } = getCameraPosition();
@@ -177,7 +197,11 @@ function render() {
       case 'circle':
         let r = mapObject.geometry.size.radius;
         pgContext.beginPath();
-        pgContext.fillStyle = mapObject.geometry.color;
+        let color = mapObject.geometry.color;
+        if ('hp' in mapObject.geometry && mapObject.geometry.hp <= 0) {
+          color = 'gray';
+        }
+        pgContext.fillStyle = color;
         pgContext.arc(x, y, r, 0, 2 * Math.PI);
         pgContext.fill();
         break;
@@ -190,8 +214,9 @@ function render() {
       pgContext.fillText(mapObject.geometry.username, x - 20, y - 40);
     }
     if (mapObject.geometry.hp) {
+      let hp = Math.max(0, mapObject.geometry.hp);
       pgContext.fillStyle = 'red';
-      pgContext.fillRect(x - 20, y - 32.5, mapObject.geometry.hp * 0.4, 10);
+      pgContext.fillRect(x - 20, y - 32.5, hp * 0.4, 10);
     }
   }
   

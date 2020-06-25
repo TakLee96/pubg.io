@@ -2,7 +2,6 @@
 Making a web game similar to surviv.io
 
 ## TODO
-* Implement logic for ghosts
 * Implement session, game termination, score accumulation and map abstraction
 * Implement different types of guns and power-ups
 * Implement damage alerts

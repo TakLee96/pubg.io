@@ -6,6 +6,7 @@
   </head>
   <body>
     <h1>WELCOME TO PUBG.IO</h1>
+    
     <form id="loginForm">
       <div>
         <label for="username">Username</label>
@@ -19,7 +20,15 @@
         <button id="goButton">GO!</button>
       </div>
     </form>
+    
     <canvas id="playground" width="1280" height="720"></canvas>
+    
+    <div id="message"></div>
+    
+    <div id="playerList">
+      <ul id="playerUList"></ul>
+    </div>
+    
     <script type="text/javascript" src="/socket.io.dev.js"></script>
     <script type="text/javascript" src="/state.js"></script>
     <script type="text/javascript" src="/main.js"></script>
