@@ -22,12 +22,19 @@ app.get('/', (req, res) => {
   res.sendFile('public/index.html', { root: __dirname });
 });
 
+app.get('/restart/:pass', (req, res) => {
+  if (req.params.pass === 'mysecretpassword123') {
+    t24b = new state();
+    socket.sockets.emit('relogin', {error: 'Hit GO! again for new match'});
+  }
+});
+
 app.use(express.static('public'));
 app.use(express.static('node_modules/socket.io-client/dist'));
 app.use(express.static('lib'));
 
 // socket.io messages
-const t24b = new state();
+let t24b = new state();
 socket.on('connection', (client) => {
   const conn = client.conn;
   log(client, `${conn.remoteAddress} connected`);
